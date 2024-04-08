@@ -31,7 +31,7 @@ if __name__ == '__main__':
     from classes.effort import Effort
     effort = Effort({'weight':1, "finger_weights":{}}, 1, 1, 1, 1, 1, 1)
     for index, character in enumerate(characters_placement.characters_set):
-        print(character.character, effort.find_index(index),
+        print(index, character.character, effort.find_index(index),
               keyboard_structure.smallest_distance_from_button_to_finger(index if index < 47 else index - 47))
 
     info_log('Visualize the characters placement')

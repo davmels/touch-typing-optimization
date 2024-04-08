@@ -1,5 +1,5 @@
 {
-  "number_of_generations": 75,
+  "number_of_generations": 25,
   "number_of_parent_placements": 100,
   "number_of_characters_placements": 5000,
   "number_of_accepted_characters_placements": 250,
@@ -804,40 +804,40 @@
       "button_id": null
     },
     {
-      "character": "!",
-      "button_id": null
-    },
-    {
       "character": "?",
       "button_id": null
     },
     {
-      "character": ":",
-      "button_id": null
+      "character": "!",
+      "button_id": 48
     },
     {
-      "character": ";",
-      "button_id": null
+      "character": "@",
+      "button_id": 49
     },
     {
-      "character": "(",
-      "button_id": null
+      "character": "#",
+      "button_id": 50
     },
     {
-      "character": ")",
-      "button_id": null
+      "character": "$",
+      "button_id": 51
     },
     {
-      "character": "[",
-      "button_id": null
+      "character": "%",
+      "button_id": 52
     },
     {
-      "character": "]",
-      "button_id": null
+      "character": "^",
+      "button_id": 53
     },
     {
-      "character": "{",
-      "button_id": null
+      "character": "&",
+      "button_id": 54
+    },
+    {
+      "character": "*",
+      "button_id": 55
     },
     {
       "character": "}",
@@ -856,27 +856,27 @@
       "button_id": null
     },
     {
-      "character": "&",
+      "character": "]",
       "button_id": null
     },
     {
-      "character": "*",
+      "character": "{",
       "button_id": null
     },
     {
-      "character": "$",
+      "character": "(",
       "button_id": null
     },
     {
-      "character": "%",
+      "character": ")",
       "button_id": null
     },
     {
-      "character": "#",
+      "character": ";",
       "button_id": null
     },
     {
-      "character": "@",
+      "character": ":",
       "button_id": null
     },
     {
@@ -916,7 +916,7 @@
       "button_id": null
     },
     {
-      "character": "^",
+      "character": "[",
       "button_id": null
     },
     {
