@@ -1,5 +1,5 @@
 {
-  "number_of_generations": 25,
+  "number_of_generations": 5,
   "number_of_parent_placements": 100,
   "number_of_characters_placements": 5000,
   "number_of_accepted_characters_placements": 250,
@@ -24,8 +24,8 @@
     "load_distribution_weight": 0,
     "modifier_overhead_weight": 3,
     "hand_alternation_weight": 0,
-    "consecutive_finger_usage_weight": 0.1,
-    "same_hand_finger_steps_weight": 0.1,
+    "consecutive_finger_usage_weight": 0,
+    "same_hand_finger_steps_weight": 0,
     "hit_direction_weight": 0.1
   },
   "keyboard_structure": {
@@ -664,12 +664,12 @@
       "button_id": 10
     },
     {
-      "character": "ა",
-      "button_id": null
+      "character": "<",
+      "button_id": 11
     },
     {
-      "character": "ბ",
-      "button_id": null
+      "character": ">",
+      "button_id": 12
     },
     {
       "character": "გ",
@@ -712,12 +712,12 @@
       "button_id": null
     },
     {
-      "character": "ნ",
-      "button_id": null
+      "character": "[",
+      "button_id": 23
     },
     {
-      "character": "ო",
-      "button_id": null
+      "character": "]",
+      "button_id": 24
     },
     {
       "character": "პ",
@@ -804,8 +804,8 @@
       "button_id": null
     },
     {
-      "character": "?",
-      "button_id": null
+      "character": "`",
+      "button_id": 46
     },
     {
       "character": "!",
@@ -840,12 +840,12 @@
       "button_id": 55
     },
     {
-      "character": "}",
-      "button_id": null
+      "character": "(",
+      "button_id": 56
     },
     {
-      "character": "-",
-      "button_id": null
+      "character": ")",
+      "button_id": 57
     },
     {
       "character": "/",
@@ -856,19 +856,19 @@
       "button_id": null
     },
     {
-      "character": "]",
+      "character": "_",
       "button_id": null
     },
     {
-      "character": "{",
+      "character": "ბ",
       "button_id": null
     },
     {
-      "character": "(",
+      "character": "\"",
       "button_id": null
     },
     {
-      "character": ")",
+      "character": "-",
       "button_id": null
     },
     {
@@ -892,35 +892,35 @@
       "button_id": null
     },
     {
-      "character": "<",
+      "character": "ა",
       "button_id": null
     },
     {
-      "character": ">",
-      "button_id": null
+      "character": "{",
+      "button_id": 70
     },
     {
-      "character": "\"",
-      "button_id": null
+      "character": "}",
+      "button_id": 71
     },
     {
       "character": " ",
       "button_id": 47
     },
     {
-      "character": "`",
+      "character": "?",
       "button_id": null
     },
     {
       "character": "~",
+      "button_id": 93
+    },
+    {
+      "character": "ნ",
       "button_id": null
     },
     {
-      "character": "[",
-      "button_id": null
-    },
-    {
-      "character": "_",
+      "character": "ო",
       "button_id": null
     },
     {

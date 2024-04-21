@@ -47,15 +47,19 @@ class KeyboardStructure:
             dirpath,
             characters_placement=None,
             show_hands=True,
-            save=False
+            save=False,
+            table_text=None
     ):
         if characters_placement is None:
             characters_placement = [''] * len(self.buttons)
 
-        img = np.ones((cm2px(self.height), cm2px(self.width), 3), np.uint8)
+        img = np.ones((cm2px(self.height) + cm2px(4.5), cm2px(self.width), 3), np.uint8)
         for i in range(cm2px(self.height)):
             for j in range(cm2px(self.width)):
                 img[i][j] = [141, 140, 127]
+        for i in range(cm2px(4.5)):
+            for j in range(cm2px(self.width)):
+                img[i + cm2px(self.height)][j] = [141, 140, 127]
 
         for button in self.buttons:
             cv.rectangle(
@@ -127,6 +131,35 @@ class KeyboardStructure:
                     color=(241, 240, 236),
                     thickness=2
                 )
+
+        if table_text:
+            table_font_scale = 0.5  # Adjust font scale for table
+            table_font = cv.FONT_HERSHEY_SIMPLEX
+            table_color = (0, 0, 0)  # Black color for table text
+            table_thickness = 2
+            table_spacing = cm2px(0.5)  # Vertical spacing between rows
+            table_row_count = 4  # Number of rows
+            table_col_count = 2  # Number of columns
+
+            # Write table text
+            for row_idx in range(table_row_count):
+                y = int(cm2px(1) + row_idx * (table_font_scale * 30 + table_spacing))  # Convert to integer
+                for col_idx in range(table_col_count):
+                    x = int(cm2px(0.5) + col_idx * cm2px(self.width/2))  # Convert to integer
+                    text_idx = row_idx * table_col_count + col_idx
+                    if text_idx < len(table_text):
+                        text = table_text[text_idx]
+                    else:
+                        text = ""
+                    cv.putText(
+                        img=img,
+                        text=text,
+                        org=(x, y + cm2px(self.height)),
+                        fontFace=table_font,
+                        fontScale=table_font_scale,
+                        color=table_color,
+                        thickness=table_thickness
+                    )
 
         cv.imshow(self.name, img)
         cv.waitKey(0)
