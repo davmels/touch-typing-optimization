@@ -4,6 +4,7 @@ import copy
 import time
 import math
 import numpy as np
+from tqdm import tqdm
 
 from multiprocessing import Process, Manager
 from threading import Thread
@@ -26,7 +27,9 @@ class Genetic:
             random_seed,
             number_of_cores,
             keyboard_structure,
-            initial_characters_placement
+            initial_characters_placement,
+            model,
+            character_to_predefined_key
     ):
         self.number_of_generations = number_of_generations
         self.number_of_characters_placements = number_of_characters_placements
@@ -37,55 +40,22 @@ class Genetic:
         self.number_of_cores = number_of_cores
         self.keyboard_structure = keyboard_structure
         self.initial_characters_placement = initial_characters_placement
+        self.model = model
+        self.character_to_predefined_key = character_to_predefined_key
 
-        self._regex = re.compile(
-            '[^%s]' % ''.join([x for x in sorted(set(self.initial_characters_placement)) if x not in ' 0123456789']))
+        searching_corpus, testing_corpus, searching_corpus_dict, searching_corpus_digraph_dict, testing_corpus_dict, testing_corpus_digraph_dict = process_corpus(
+            corpus_path=corpus_path, characters_placement=self.initial_characters_placement, random_seed=random_seed,
+            maximum_line_length=maximum_line_length, searching_corpus_size=searching_corpus_size,
+            testing_corpus_size=testing_corpus_size)
 
-        self.corpus = open(corpus_path, 'r', encoding='utf-8').read().split('\n')
-        self.corpus = [line for line in self.corpus if len(line) <= maximum_line_length]
+        self.searching_corpus = searching_corpus
+        self.testing_corpus = testing_corpus_dict
+        self.searching_corpus_dict = searching_corpus_dict
+        self.searching_corpus_digraph_dict = searching_corpus_digraph_dict
+        self.testing_corpus_dict = testing_corpus_dict
+        self.testing_corpus_digraph_dict = testing_corpus_digraph_dict
 
-        if random_seed is None:
-            rng = np.random.RandomState()
-        else:
-            rng = np.random.RandomState(random_seed)
-        rng.shuffle(self.corpus)
-
-        self.searching_corpus = [self._preprocess_line(line) for line in self.corpus[:searching_corpus_size]]
-
-        if len(self.searching_corpus) < searching_corpus_size:
-            warning_log('Searching corpus size didn\'t reach %s, its current size is %s' %
-                        (searching_corpus_size, len(self.searching_corpus)))
-
-        self.searching_corpus_dict = {}
-        self.searching_corpus_digraph_dict = {}
-        for line in self.searching_corpus:
-            line = line.strip()
-            for i in range(len(line)):
-                char = line[i]
-                self.searching_corpus_dict[char] = self.searching_corpus_dict.setdefault(char, 0) + 1
-                if i < len(line) - 1:
-                    self.searching_corpus_digraph_dict[
-                        char + line[i + 1]] = self.searching_corpus_digraph_dict.setdefault(
-                        char + line[i + 1], 0) + 1
-
-        self.testing_corpus = [self._preprocess_line(line) for line in
-                               self.corpus[searching_corpus_size:searching_corpus_size + testing_corpus_size]]
-
-        if len(self.testing_corpus) < testing_corpus_size:
-            warning_log('Testing corpus size didn\'t reach %s, its current size is %s' %
-                        (testing_corpus_size, len(self.testing_corpus)))
-
-        self.testing_corpus_dict = {}
-        self.testing_corpus_digraph_dict = {}
-        for line in self.testing_corpus:
-            line = line.strip()
-            for i in range(len(line)):
-                char = line[i]
-                self.testing_corpus_dict[char] = self.testing_corpus_dict.setdefault(char, 0) + 1
-                if i < len(line) - 1:
-                    self.testing_corpus_digraph_dict[char + line[i + 1]] = self.testing_corpus_digraph_dict.setdefault(
-                        char + line[i + 1], 0) + 1
-
+        info_log(f"Generating {self.number_of_characters_placements} random keyboards")
         self.characters_placements = list()
         for _ in range(self.number_of_characters_placements):
             self.characters_placements.append(copy.deepcopy(self.initial_characters_placement))
@@ -100,11 +70,41 @@ class Genetic:
         for generation in range(self.number_of_generations):
             info_log('Start generation number %s' % (generation + 1))
 
-            info_log('Calculate fitness function for each characters placement')
-            best_characters_placement = self.calculate_fitness_for_characters_placements()
-            if self.best_characters_placement is None or best_characters_placement.fitness < self.best_characters_placement.fitness:
-                self.best_characters_placement = best_characters_placement
-            info_log('Best characters placement fitness value: %s' % self.best_characters_placement.fitness)
+            if self.model != None:
+                info_log('Calculate fitness function for each characters placement')
+                best_characters_placements = self.calculate_fitness_for_characters_placements_DNN()
+                # if self.best_characters_placement is None or best_characters_placement.fitness < self.best_characters_placement.fitness:
+                #     self.best_characters_placement = best_characters_placement
+                # info_log('Best characters placement fitness value: %s' % self.best_characters_placement.fitness)
+                info_log('Best characters placement fitness value: %s' % best_characters_placements[0][2])
+
+                true_fitness = []
+                for b in tqdm(best_characters_placements):
+                    b[0].calculate_fitness(self.keyboard_structure, self.searching_corpus_dict,
+                                           self.searching_corpus_digraph_dict)
+                    true_fitness.append(b[0].fitness)
+
+                self.model.fit(
+                    np.array([best_characters_placements[i][1] for i in range(len(best_characters_placements))]),
+                    np.array(true_fitness), epochs=10)
+
+                trueJoint = [[best_characters_placements[i][0], true_fitness[i]] for i in
+                             range(len(best_characters_placements))]
+                sorted_trueJoint = sorted(trueJoint, key=lambda x: x[1])
+                self.characters_placements = [sorted_trueJoint[i][0] for i in range(self.number_of_accepted_characters_placements)]
+
+                best_fitness_value = sorted_trueJoint[0][1]
+                best_characters_placement = sorted_trueJoint[0][0]
+                if self.best_characters_placement is None or best_fitness_value < self.best_fitness_value:
+                    self.best_characters_placement = best_characters_placement
+                    self.best_fitness_value = best_fitness_value
+                info_log('Best characters placement True fitness value: %s' % self.best_fitness_value)
+            else:
+                info_log('Calculate fitness function for each characters placement')
+                best_characters_placement = self.calculate_fitness_for_characters_placements()
+                if self.best_characters_placement is None or best_characters_placement.fitness < self.best_characters_placement.fitness:
+                    self.best_characters_placement = best_characters_placement
+                info_log('Best characters placement fitness value: %s' % self.best_characters_placement.fitness)
 
             info_log('Start natural selection and crossover')
             self.natural_selection_and_crossover()
@@ -117,6 +117,7 @@ class Genetic:
 
         self.time = round((time.time() - start_time) / 60, 2)
         info_log('Time taken for genetic algorithm is %s minutes' % (self.time))
+        return self.time
 
     def calculate_bucket_fitness(self, characters_placements, keyboard_structure, searching_corpus_dict,
                                  searching_corpus_digraph_dict, index,
@@ -164,6 +165,25 @@ class Genetic:
 
         return best_characters_placement
 
+    def calculate_fitness_for_characters_placements_DNN(self):
+
+        num_of_characters = len(self.initial_characters_placement.characters_set)
+
+        keyboard_onehots = np.zeros([len(self.characters_placements), num_of_characters, num_of_characters], dtype=int)
+        for cp in range(len(self.characters_placements)):
+            for l in range(num_of_characters):
+                character = self.characters_placements[cp].characters_set[l].character
+                keyboard_onehots[cp][l][self.character_to_predefined_key[character]] = 1
+
+        fitness_dict = self.model.predict(keyboard_onehots)
+
+        joint = [[self.characters_placements[i], keyboard_onehots[i], fitness_dict[i][0]] for i in
+                 range(len(self.characters_placements))]
+        sorted_joint = sorted(joint, key=lambda x: x[2])
+
+        # return best_characters_placements,
+        return sorted_joint[:self.number_of_accepted_characters_placements]
+
     def natural_selection_and_crossover_old(self):
         self.characters_placements = sorted(self.characters_placements,
                                             key=lambda characters_placement: characters_placement.fitness)
@@ -199,8 +219,9 @@ class Genetic:
         self.characters_placements = temp_characters_placements
 
     def natural_selection_and_crossover(self):
-        self.characters_placements = sorted(self.characters_placements,
-                                            key=lambda characters_placement: characters_placement.fitness)
+        if self.model == None:
+            self.characters_placements = sorted(self.characters_placements,
+                                                key=lambda characters_placement: characters_placement.fitness)
 
         temp_characters_placements = list()
         for i in range(self.number_of_accepted_characters_placements):
@@ -210,10 +231,12 @@ class Genetic:
                 self.number_of_randomly_injected_characters_placements:
             a, b = np.random.randint(low=0, high=self.number_of_parent_placements, size=2)
 
-            temp_characters_placements.append(self._cyclic_crossover(
+            temp_characters_placement = self._cyclic_crossover(
                 temp_characters_placements[a],
                 temp_characters_placements[b]
-            ))
+            )
+            if temp_characters_placement.validate_parenthesis():
+                temp_characters_placements.append(temp_characters_placement)
 
         self.characters_placements = temp_characters_placements
 
@@ -233,9 +256,6 @@ class Genetic:
 
         with open(os.path.join(dirpath, 'testing_corpus'), 'w', encoding='utf-8') as file:
             file.write('\n'.join(self.testing_corpus))
-
-    def _preprocess_line(self, line):
-        return self._regex.sub('', line)
 
     def _crossover_old(self, a, b):
         new_characters_placement = copy.deepcopy(a)

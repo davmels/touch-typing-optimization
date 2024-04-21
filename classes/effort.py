@@ -234,9 +234,6 @@ class Effort:
 
         return v6 / total_digraphs * self.empirical_normalisation[6]
 
-
-
-
     def find_index(self, index):
         shift = 0
         if index > 46:
@@ -275,3 +272,46 @@ class Effort:
         for index, character in enumerate(characters_set):
             character_to_index[character.character] = index
         return character_to_index
+
+    def calculate_effort_detailed(self, keyboard_structure, searching_corpus_dict, characters_set,
+                                  searching_corpus_digraph_dict):
+        effort = {}
+        if self.finger_distance_weight != 0:
+            effort['finger_distance_weight'] = self.finger_distance_weight * self.finger_distance(keyboard_structure,
+                                                                                                  searching_corpus_dict,
+                                                                                                  characters_set)
+        else:
+            effort['finger_distance_weight'] = 0.
+        # if self.load_distribution_weight != 0:
+        #     effort['load_distribution_weight'] = (
+        #             self.load_distribution_weight * self.load_distribution(searching_corpus_dict, characters_set))
+        # else:
+        #     effort['load_distribution_weight'] = 0.
+        if self.modifier_overhead_weight != 0:
+            effort['modifier_overhead_weight'] = self.modifier_overhead_weight * self.modifier_overhead(
+                searching_corpus_dict, characters_set)
+        else:
+            effort['modifier_overhead_weight'] = 0.
+        if self.hand_alternation_weight != 0:
+            effort['hand_alternation_weight'] = self.hand_alternation_weight * self.hand_alternation(
+                searching_corpus_digraph_dict,
+                characters_set)
+        else:
+            effort['hand_alternation_weight'] = 0.
+        if self.consecutive_finger_usage_weight != 0:
+            effort['consecutive_finger_usage_weight'] = self.consecutive_finger_usage(searching_corpus_digraph_dict,
+                                                                                      characters_set) * self.consecutive_finger_usage_weight
+        else:
+            effort['consecutive_finger_usage_weight'] = 0.
+        if self.same_hand_finger_steps_weight != 0:
+            effort['same_hand_finger_steps_weight'] = self.same_hand_finger_steps(searching_corpus_digraph_dict,
+                                                                                  characters_set) * self.same_hand_finger_steps_weight
+        else:
+            effort['same_hand_finger_steps_weight'] = 0.
+        if self.hit_direction_weight != 0:
+            effort['hit_direction_weight'] = self.hit_direction(searching_corpus_digraph_dict,
+                                                                characters_set) * self.hit_direction_weight
+        else:
+            effort['hit_direction_weight'] = 0.
+
+        return effort
