@@ -157,3 +157,22 @@ def generate_name_from_config(config, date=True, generations=True):
         name = name + " #  " + date_string
 
     return name
+
+
+def get_non_fixed_punctuation(characters_placement):
+    punctuations = '''".',?!:;()[]{}-/&*$%#@+=<>`_^~'''
+    #georgian_letters = 'აბგდევზთიკლმნოპჟრსტუფქღყშჩცძწჭხჯჰ'
+    non_fixed_punctuation = []
+    for character in characters_placement:
+        if character.character in punctuations and character.button_id is None:
+            non_fixed_punctuation.append(character)
+    return non_fixed_punctuation
+
+def get_non_fixed_letters(characters_placement):
+    #punctuations = '''".',?!:;()[]{}-/&*$%#@+=<>`_^~'''
+    georgian_letters = 'აბგდევზთიკლმნოპჟრსტუფქღყშჩცძწჭხჯჰ'
+    non_fixed_letters = []
+    for character in characters_placement:
+        if character.character in georgian_letters and character.button_id is None:
+            non_fixed_letters.append(character)
+    return non_fixed_letters

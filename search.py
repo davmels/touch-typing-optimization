@@ -75,7 +75,8 @@ if __name__ == '__main__':
 
     info_log('Construct initial characters placement')
     initial_characters_placement = CharactersPlacement(characters_set=genetic_config['characters_set'],
-                                                       effort_parameters=genetic_config['effort_parameters'])
+                                                       effort_parameters=genetic_config['effort_parameters'],
+                                                       punctuation_placement=sorted(genetic_config['punctuation_placement']))
 
     with open("saved_models/character_to_predefined_key.json", 'r', encoding='utf-8') as json_file_read:
         character_to_predefined_key = json.load(json_file_read)
@@ -133,6 +134,10 @@ if __name__ == '__main__':
 
     for index, (key, value) in enumerate(each_effort.items()):
         table_text[index] = table_text[index] + f"{value:.3f}"
+
+    table_text.append(f"Number of generations: {genetic_config['number_of_generations']}")
+    from datetime import datetime
+    table_text.append(f"Date of creation: {datetime.now()}")
 
     genetic.keyboard_structure.visualize(
         dirpath=os.path.join(os.path.dirname(args.genetic_config), "layout_images"),

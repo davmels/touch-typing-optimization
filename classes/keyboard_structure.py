@@ -138,12 +138,12 @@ class KeyboardStructure:
             table_color = (0, 0, 0)  # Black color for table text
             table_thickness = 2
             table_spacing = cm2px(0.5)  # Vertical spacing between rows
-            table_row_count = 4  # Number of rows
+            table_row_count = 5  # Number of rows
             table_col_count = 2  # Number of columns
 
             # Write table text
             for row_idx in range(table_row_count):
-                y = int(cm2px(1) + row_idx * (table_font_scale * 30 + table_spacing))  # Convert to integer
+                y = int(cm2px(0.4) + row_idx * (table_font_scale * 30 + table_spacing))  # Convert to integer
                 for col_idx in range(table_col_count):
                     x = int(cm2px(0.5) + col_idx * cm2px(self.width/2))  # Convert to integer
                     text_idx = row_idx * table_col_count + col_idx
