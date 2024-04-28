@@ -235,8 +235,8 @@ class Genetic:
                 temp_characters_placements[a],
                 temp_characters_placements[b]
             )
-            if temp_characters_placement.validate_parenthesis():
-                temp_characters_placements.append(temp_characters_placement)
+
+            temp_characters_placements.append(temp_characters_placement)
 
         self.characters_placements = temp_characters_placements
 

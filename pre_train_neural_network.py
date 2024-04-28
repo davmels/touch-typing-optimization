@@ -28,7 +28,8 @@ if __name__ == '__main__':
 
     info_log('Construct initial characters placement')
     initial_characters_placement = CharactersPlacement(characters_set=genetic_config['characters_set'],
-                                                       effort_parameters=genetic_config['effort_parameters'])
+                                                       effort_parameters=genetic_config['effort_parameters'],
+                                                       punctuation_placement=genetic_config['punctuation_placement'])
 
     model_name = generate_name_from_config(genetic_config, date=False, generations=False)
     model_name += f" # {number_of_keyboards} - {number_of_epochs}"

@@ -1,5 +1,5 @@
 {
-  "number_of_generations": 5,
+  "number_of_generations": 250,
   "number_of_parent_placements": 100,
   "number_of_characters_placements": 5000,
   "number_of_accepted_characters_placements": 250,
@@ -28,6 +28,20 @@
     "same_hand_finger_steps_weight": 0,
     "hit_direction_weight": 0.1
   },
+  "punctuation_placement": [
+    58,
+    59,
+    34,
+    35,
+    81,
+    82,
+    43,
+    44,
+    45,
+    90,
+    91,
+    92
+  ],
   "keyboard_structure": {
     "name": "Full Layout",
     "width": 25.67,
@@ -852,7 +866,7 @@
       "button_id": null
     },
     {
-      "character": "\\",
+      "character": "dummy_character_20",
       "button_id": null
     },
     {
@@ -888,7 +902,7 @@
       "button_id": null
     },
     {
-      "character": "|",
+      "character": "dummy_character_19",
       "button_id": null
     },
     {
