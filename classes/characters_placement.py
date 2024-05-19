@@ -1,5 +1,6 @@
 import time
 import numpy as np
+import json
 
 from helpers import *
 from classes.character import Character
@@ -143,3 +144,11 @@ class CharactersPlacement:
                 k += 1
                 i -= 1
             i += 1
+
+    def to_dict(self):
+        return {
+            'characters_set': [character.character for character in self.characters_set]
+        }
+
+    def to_json(self):
+        return json.dumps(self.to_dict())

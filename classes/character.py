@@ -7,3 +7,9 @@ class Character:
         if type(other) is Character:
             return self.character == other.character
         return False
+
+    def to_dict(self):
+        return {
+            'character': self.character,
+            'button_id': self.button_id
+        }
