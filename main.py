@@ -25,14 +25,14 @@ user_sessions = {}
 
 @socketio.on('connect')
 def handle_connect():
-    print('Client connected')
+    print('Client connected, socket id: ', request.sid)
     register_event_handlers()
 
 
 def register_event_handlers():
     @socketio.on('disconnect')
     def handle_disconnect():
-        print('Client disconnected')
+        print('Client disconnected, socket it: ', request.sid)
 
     @socketio.on('custom_event')
     def handle_custom_event(data):
@@ -47,7 +47,7 @@ def register_event_handlers():
         tasks[sid] = {'progress': 0, 'result': None}
         thread = threading.Thread(target=controller.search, args=(config, socketio, sid))
         thread.start()
-        socketio.emit('progress', tasks[sid], to=sid)
+        socketio.emit('progress', {"current_generation":0, "total_generations": config["number_of_generations"]}, to=sid)
 
 
 @app.route("/")

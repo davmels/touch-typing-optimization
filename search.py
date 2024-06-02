@@ -113,7 +113,7 @@ if __name__ == '__main__':
         table_text.append(f"{key} : {value:.3f} / ")
 
     table_text.append(f"Time taken: {genetic.start()} minutes")
-    genetic.save_searching_and_testing_corpus(os.path.dirname(args.genetic_config))
+    #genetic.save_searching_and_testing_corpus(os.path.dirname(args.genetic_config))
 
     genetic.best_characters_placement.calculate_fitness(
         genetic.keyboard_structure,

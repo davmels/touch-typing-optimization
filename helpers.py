@@ -1,3 +1,4 @@
+import json
 import re
 import sys
 import time
@@ -82,62 +83,90 @@ def error_log(message, is_exit):
 
 def process_corpus(corpus_path, characters_placement, random_seed, maximum_line_length, searching_corpus_size,
                    testing_corpus_size, fixed_characters=' 0123456789'):
-    _regex = re.compile(
-        '[^%s]' % ''.join(
-            [x.character for x in characters_placement.characters_set if x.button_id is None and len(x.character) < 3]))
+    # _regex = re.compile(
+    #     '[^%s]' % ''.join(
+    #         [x.character for x in characters_placement.characters_set if x.button_id is None and len(x.character) < 3]))
+    #
+    # def _preprocess_line(line):
+    #     return _regex.sub('', line)
+    #
+    # info_log("Reading text corpus")
+    # corpus = open(corpus_path, 'r', encoding='utf-8').read().split('\n')
+    # corpus = [line for line in corpus if len(line) <= maximum_line_length]
+    #
+    # if random_seed is None:
+    #     rng = np.random.RandomState()
+    # else:
+    #     rng = np.random.RandomState(random_seed)
+    # rng.shuffle(corpus)
+    #
+    # info_log("Constructing dictionaries of frequencies of monographs and digraphs with the searching corpus")
+    # searching_corpus = [_preprocess_line(line) for line in corpus[:-testing_corpus_size]]
+    #
+    # if len(searching_corpus) < searching_corpus_size:
+    #     warning_log('Searching corpus size didn\'t reach %s, its current size is %s' %
+    #                 (searching_corpus_size, len(searching_corpus)))
+    #
+    # searching_corpus_dict = {}
+    # searching_corpus_digraph_dict = {}
+    # for line in searching_corpus:
+    #     line = line.strip()
+    #     for i in range(len(line)):
+    #         char = line[i]
+    #         searching_corpus_dict[char] = searching_corpus_dict.setdefault(char, 0) + 1
+    #         if i < len(line) - 1:
+    #             searching_corpus_digraph_dict[
+    #                 char + line[i + 1]] = searching_corpus_digraph_dict.setdefault(
+    #                 char + line[i + 1], 0) + 1
+    #
+    # info_log("Constructing dictionaries of frequencies of monographs and digraphs with the testing corpus")
+    # testing_corpus = [_preprocess_line(line) for line in
+    #                   corpus[-testing_corpus_size:]]
+    #
+    # if len(testing_corpus) < testing_corpus_size:
+    #     warning_log('Testing corpus size didn\'t reach %s, its current size is %s' %
+    #                 (testing_corpus_size, len(testing_corpus)))
+    #
+    # testing_corpus_dict = {}
+    # testing_corpus_digraph_dict = {}
+    # for line in testing_corpus:
+    #     line = line.strip()
+    #     for i in range(len(line)):
+    #         char = line[i]
+    #         testing_corpus_dict[char] = testing_corpus_dict.setdefault(char, 0) + 1
+    #         if i < len(line) - 1:
+    #             testing_corpus_digraph_dict[char + line[i + 1]] = testing_corpus_digraph_dict.setdefault(
+    #                 char + line[i + 1], 0) + 1
+    #
+    # with open('data_dir/searching_corpus_dict.json', 'w', encoding='utf-8') as json_file:
+    #     json.dump(searching_corpus_dict, json_file, ensure_ascii=False, indent=4)
+    #
+    # with open("data_dir/searching_corpus_digraph_dict.json", 'w', encoding='utf-8') as json_file:
+    #     json.dump(searching_corpus_digraph_dict, json_file, ensure_ascii=False, indent=4)
+    #
+    # with open("data_dir/testing_corpus_dict.json", 'w', encoding='utf-8') as json_file:
+    #     json.dump(testing_corpus_dict, json_file, ensure_ascii=False, indent=4)
+    #
+    # with open("data_dir/testing_corpus_digraph_dict.json", 'w', encoding='utf-8') as json_file:
+    #     json.dump(testing_corpus_digraph_dict, json_file, ensure_ascii=False, indent=4)
 
-    def _preprocess_line(line):
-        return _regex.sub('', line)
 
-    info_log("Reading text corpus")
-    corpus = open(corpus_path, 'r', encoding='utf-8').read().split('\n')
-    corpus = [line for line in corpus if len(line) <= maximum_line_length]
+    info_log("Constructing dictionaries of frequencies of monographs and digraphs")
+    with open("data_dir/searching_corpus_dict.json", 'r', encoding='utf-8') as json_file:
+        searching_corpus_dict = json.load(json_file)
 
-    if random_seed is None:
-        rng = np.random.RandomState()
-    else:
-        rng = np.random.RandomState(random_seed)
-    rng.shuffle(corpus)
+    with open("data_dir/searching_corpus_digraph_dict.json", 'r', encoding='utf-8') as json_file:
+        searching_corpus_digraph_dict = json.load(json_file)
 
-    info_log("Constructing dictionaries of frequencies of monographs and digraphs with the searching corpus")
-    searching_corpus = [_preprocess_line(line) for line in corpus[:searching_corpus_size]]
+    with open("data_dir/testing_corpus_dict.json", 'r', encoding='utf-8') as json_file:
+        testing_corpus_dict = json.load(json_file)
 
-    if len(searching_corpus) < searching_corpus_size:
-        warning_log('Searching corpus size didn\'t reach %s, its current size is %s' %
-                    (searching_corpus_size, len(searching_corpus)))
+    with open("data_dir/testing_corpus_digraph_dict.json", 'r', encoding='utf-8') as json_file:
+        testing_corpus_digraph_dict = json.load(json_file)
 
-    searching_corpus_dict = {}
-    searching_corpus_digraph_dict = {}
-    for line in searching_corpus:
-        line = line.strip()
-        for i in range(len(line)):
-            char = line[i]
-            searching_corpus_dict[char] = searching_corpus_dict.setdefault(char, 0) + 1
-            if i < len(line) - 1:
-                searching_corpus_digraph_dict[
-                    char + line[i + 1]] = searching_corpus_digraph_dict.setdefault(
-                    char + line[i + 1], 0) + 1
-
-    info_log("Constructing dictionaries of frequencies of monographs and digraphs with the testing corpus")
-    testing_corpus = [_preprocess_line(line) for line in
-                      corpus[searching_corpus_size:searching_corpus_size + testing_corpus_size]]
-
-    if len(testing_corpus) < testing_corpus_size:
-        warning_log('Testing corpus size didn\'t reach %s, its current size is %s' %
-                    (testing_corpus_size, len(testing_corpus)))
-
-    testing_corpus_dict = {}
-    testing_corpus_digraph_dict = {}
-    for line in testing_corpus:
-        line = line.strip()
-        for i in range(len(line)):
-            char = line[i]
-            testing_corpus_dict[char] = testing_corpus_dict.setdefault(char, 0) + 1
-            if i < len(line) - 1:
-                testing_corpus_digraph_dict[char + line[i + 1]] = testing_corpus_digraph_dict.setdefault(
-                    char + line[i + 1], 0) + 1
-
-    return searching_corpus, testing_corpus, searching_corpus_dict, searching_corpus_digraph_dict, testing_corpus_dict, testing_corpus_digraph_dict
+    #print(searching_corpus_dict, searching_corpus_digraph_dict, testing_corpus_dict, testing_corpus_digraph_dict)
+    #return searching_corpus, testing_corpus, searching_corpus_dict, searching_corpus_digraph_dict, testing_corpus_dict, testing_corpus_digraph_dict
+    return searching_corpus_dict, searching_corpus_digraph_dict, testing_corpus_dict, testing_corpus_digraph_dict
 
 
 def generate_name_from_config(config, date=True, generations=True):

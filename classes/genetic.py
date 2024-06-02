@@ -29,7 +29,8 @@ class Genetic:
             keyboard_structure,
             initial_characters_placement,
             model,
-            character_to_predefined_key
+            character_to_predefined_key,
+            socket_emit_progress=None
     ):
         self.number_of_generations = number_of_generations
         self.number_of_characters_placements = number_of_characters_placements
@@ -42,14 +43,19 @@ class Genetic:
         self.initial_characters_placement = initial_characters_placement
         self.model = model
         self.character_to_predefined_key = character_to_predefined_key
+        self.socket_emit_progress = socket_emit_progress
 
-        searching_corpus, testing_corpus, searching_corpus_dict, searching_corpus_digraph_dict, testing_corpus_dict, testing_corpus_digraph_dict = process_corpus(
+        # searching_corpus, testing_corpus, searching_corpus_dict, searching_corpus_digraph_dict, testing_corpus_dict, testing_corpus_digraph_dict = process_corpus(
+        #     corpus_path=corpus_path, characters_placement=self.initial_characters_placement, random_seed=random_seed,
+        #     maximum_line_length=maximum_line_length, searching_corpus_size=searching_corpus_size,
+        #     testing_corpus_size=testing_corpus_size)
+        searching_corpus_dict, searching_corpus_digraph_dict, testing_corpus_dict, testing_corpus_digraph_dict = process_corpus(
             corpus_path=corpus_path, characters_placement=self.initial_characters_placement, random_seed=random_seed,
             maximum_line_length=maximum_line_length, searching_corpus_size=searching_corpus_size,
             testing_corpus_size=testing_corpus_size)
 
-        self.searching_corpus = searching_corpus
-        self.testing_corpus = testing_corpus_dict
+        # self.searching_corpus = searching_corpus
+        # self.testing_corpus = testing_corpus
         self.searching_corpus_dict = searching_corpus_dict
         self.searching_corpus_digraph_dict = searching_corpus_digraph_dict
         self.testing_corpus_dict = testing_corpus_dict
@@ -91,7 +97,8 @@ class Genetic:
                 trueJoint = [[best_characters_placements[i][0], true_fitness[i]] for i in
                              range(len(best_characters_placements))]
                 sorted_trueJoint = sorted(trueJoint, key=lambda x: x[1])
-                self.characters_placements = [sorted_trueJoint[i][0] for i in range(self.number_of_accepted_characters_placements)]
+                self.characters_placements = [sorted_trueJoint[i][0] for i in
+                                              range(self.number_of_accepted_characters_placements)]
 
                 best_fitness_value = sorted_trueJoint[0][1]
                 best_characters_placement = sorted_trueJoint[0][0]
@@ -114,6 +121,9 @@ class Genetic:
 
             info_log('Start random injection')
             self.random_injection()
+
+            if self.socket_emit_progress:
+                self.socket_emit_progress(generation + 1, self.number_of_generations)
 
         self.time = round((time.time() - start_time) / 60, 2)
         info_log('Time taken for genetic algorithm is %s minutes' % (self.time))
@@ -250,12 +260,12 @@ class Genetic:
         for characters_placement in self.characters_placements[self.number_of_accepted_characters_placements:]:
             characters_placement.mutate(self.maximum_number_of_mutation_operations)
 
-    def save_searching_and_testing_corpus(self, dirpath):
-        with open(os.path.join(dirpath, 'searching_corpus'), 'w', encoding='utf-8') as file:
-            file.write('\n'.join(self.searching_corpus))
-
-        with open(os.path.join(dirpath, 'testing_corpus'), 'w', encoding='utf-8') as file:
-            file.write('\n'.join(self.testing_corpus))
+    # def save_searching_and_testing_corpus(self, dirpath):
+    #     with open(os.path.join(dirpath, 'searching_corpus'), 'w', encoding='utf-8') as file:
+    #         file.write('\n'.join(self.searching_corpus))
+    #
+    #     with open(os.path.join(dirpath, 'testing_corpus'), 'w', encoding='utf-8') as file:
+    #         file.write('\n'.join(self.testing_corpus))
 
     def _crossover_old(self, a, b):
         new_characters_placement = copy.deepcopy(a)

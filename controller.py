@@ -13,6 +13,11 @@ class Controller:
 
     def search(self, config, socket, sid):
 
+        def socket_progress_emit(current_geneneration, total_generations):
+            socket.emit('progress', {
+                'current_generation': current_geneneration, 'total_generations': total_generations},
+                        to=sid)
+
         model_name = generate_name_from_config(config, date=False, generations=False)
         model_name = "saved_models/" + model_name + " # 10000 - 2000.keras"
 
@@ -64,7 +69,8 @@ class Controller:
             keyboard_structure=keyboard_structure,
             initial_characters_placement=initial_characters_placement,
             model=model,
-            character_to_predefined_key=character_to_predefined_key
+            character_to_predefined_key=character_to_predefined_key,
+            socket_emit_progress=socket_progress_emit
         )
 
         table_text = []
@@ -81,4 +87,3 @@ class Controller:
         socket.emit('result', {
             'characters_set': [character.character for character in genetic.best_characters_placement.characters_set]},
                     to=sid)
-        # return genetic.best_characters_placement

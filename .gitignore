@@ -1,1 +1,18 @@
 __pycache__/
+
+.env
+
+data_dir/bpg_glaho_sylfaen.ttf
+data_dir/CC100_filtered_subset.txt
+data_dir/TED2013 v1.1.txt
+
+predefined_characters_placements
+
+searched_characters_placements
+
+beta_distribution.png
+fitness_values_plot.png
+plot_fitness_value.py
+pre_train_neural_network.py
+test.py
+visualize_characters_placement.py
