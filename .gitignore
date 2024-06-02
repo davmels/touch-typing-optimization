@@ -16,5 +16,6 @@ plot_fitness_value.py
 pre_train_neural_network.py
 test.py
 visualize_characters_placement.py
+search.py
 
 .idea
