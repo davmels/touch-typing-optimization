@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 vite_server_url = os.getenv('VITE_SERVER_URL')
+port = os.getenv("PORT")
 
 app = Flask(__name__)
 CORS(app, origins=[vite_server_url])
@@ -16,4 +17,4 @@ socket_controller = SocketController(socketio)
 app_controller = AppController(app)
 
 if __name__ == '__main__':
-    socketio.run(app, host='127.0.0.1', port=5000, debug=True)
+    socketio.run(app, host='127.0.0.1', port=port, debug=True)
