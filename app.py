@@ -4,7 +4,6 @@ from flask_cors import CORS
 from controller import SocketController, AppController
 import os
 from dotenv import load_dotenv
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Render specific parameters
 
 load_dotenv()
 vite_server_url = os.getenv('VITE_SERVER_URL')
