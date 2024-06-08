@@ -4,10 +4,11 @@ from flask_cors import CORS
 from controller import SocketController, AppController
 import os
 from dotenv import load_dotenv
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress TensorFlow logging
 
 load_dotenv()
 vite_server_url = os.getenv('VITE_SERVER_URL')
-PORT = int(os.getenv("PORT"))
+PORT = int(os.getenv("PORT", 5000))
 
 app = Flask(__name__)
 CORS(app, origins=[vite_server_url])
