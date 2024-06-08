@@ -1,24 +1,89 @@
-import json
+import copy
+import threading
+from flask import request
 from classes.genetic import Genetic
 from helpers import *
 import os
 import keras
 from classes.characters_placement import CharactersPlacement
 from classes.keyboard_structure import KeyboardStructure
+from train_network import TrainNeuralNetwork
+
+with open('utility/config.json', 'r', encoding='utf-8') as jfr:
+    config_initial = json.load(jfr)
 
 
-class Controller:
+class AppController:
+    def __init__(self, app):
+        self.app = app
+        self.register_endpoints()
+
+    def register_endpoints(self):
+        @self.app.route("/")
+        def home():
+            return "Home"
+
+
+class SocketController:
+    def __init__(self, socketio):
+        self.socketio = socketio
+        self.Optimizer = Optimizer()
+
+        self.register_event_handlers()
+
+    def register_event_handlers(self):
+        @self.socketio.on('connect')
+        def handle_connect():
+            print('Client connected, socket id: ', request.sid)
+
+        @self.socketio.on('disconnect')
+        def handle_disconnect():
+            print('Client disconnected, socket it: ', request.sid)
+
+        @self.socketio.on('custom_event')
+        def handle_custom_event(data):
+            print('Received custom event:', data)
+            data['data'] = "oh nou"
+            self.socketio.emit('custom_event', {'data': data}, to=request.sid)
+
+        @self.socketio.on('generate_keyboard_layout')
+        def generate_keyboard_layout(optimization_config):
+            sid = request.sid
+
+            def socket_progress_emit(current_generation, total_generations):
+                self.socketio.emit('progress', {
+                    'current_generation': current_generation, 'total_generations': total_generations},
+                                   to=sid)
+
+            def initialization_finish_emit():
+                self.socketio.emit('initialization_finish', to=sid)
+
+            def result_emit(genetic):
+                self.socketio.emit('result', {
+                    'characters_set': [character.to_dict() for character in
+                                       genetic.best_characters_placement.characters_set]},
+                                   to=sid)
+
+            thread = threading.Thread(target=self.Optimizer.search,
+                                      args=(optimization_config, socket_progress_emit, initialization_finish_emit,
+                                            result_emit))
+
+            self.socketio.emit('initialization_start', to=sid)
+            thread.start()
+
+
+class Optimizer:
     def __init__(self):
-        pass
+        self.train_neural_network = TrainNeuralNetwork()
 
-    def search(self, config, socket, sid):
+    def search(self, optimization_config, socket_progress_emit, initialization_finish_emit, result_emit):
 
-        def socket_progress_emit(current_geneneration, total_generations):
-            socket.emit('progress', {
-                'current_generation': current_geneneration, 'total_generations': total_generations},
-                        to=sid)
+        config = copy.deepcopy(config_initial)
+        config['effort_parameters'] = optimization_config['effort_parameters']
+        config['punctuation_placement'] = optimization_config['punctuation_placement']
+        config['number_of_generations'] = optimization_config['number_of_generations']
 
-        model_name = generate_name_from_config(config, date=False, generations=False)
+        model_name = generate_name_from_config(config, date=False, generations=False, hands=True)
         model_name = "saved_models/" + model_name + " # 10000 - 2000.keras"
 
         if os.path.exists(model_name):
@@ -26,10 +91,9 @@ class Controller:
             info_log("Loading the neural network model")
             model = keras.models.load_model(model_name)
         else:
-            info_log("Couldn't find the neural network model specified, optimizing with default neural network")
-            model = None
+            info_log("Couldn't find the neural network model specified, training a neural network from scratch")
+            model = self.train_neural_network.train(config)
 
-        # naming each picture according to the effort parameters and date.
         picture_name = generate_name_from_config(config)
 
         info_log('Construct keyboard structure')
@@ -73,17 +137,7 @@ class Controller:
             socket_emit_progress=socket_progress_emit
         )
 
-        table_text = []
-        each_effort = genetic.initial_characters_placement.effort.calculate_effort_detailed(keyboard_structure,
-                                                                                            genetic.searching_corpus_dict,
-                                                                                            genetic.initial_characters_placement.characters_set,
-                                                                                            genetic.searching_corpus_digraph_dict)
+        initialization_finish_emit()
+        genetic.start()
 
-        for index, (key, value) in enumerate(each_effort.items()):
-            table_text.append(f"{key} : {value:.3f} / ")
-
-        table_text.append(f"Time taken: {genetic.start()} minutes")
-
-        socket.emit('result', {
-            'characters_set': [character.character for character in genetic.best_characters_placement.characters_set]},
-                    to=sid)
+        result_emit(genetic)

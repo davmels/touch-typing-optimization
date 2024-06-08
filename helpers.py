@@ -150,7 +150,6 @@ def process_corpus(corpus_path, characters_placement, random_seed, maximum_line_
     # with open("data_dir/testing_corpus_digraph_dict.json", 'w', encoding='utf-8') as json_file:
     #     json.dump(testing_corpus_digraph_dict, json_file, ensure_ascii=False, indent=4)
 
-
     info_log("Constructing dictionaries of frequencies of monographs and digraphs")
     with open("data_dir/searching_corpus_dict.json", 'r', encoding='utf-8') as json_file:
         searching_corpus_dict = json.load(json_file)
@@ -164,19 +163,19 @@ def process_corpus(corpus_path, characters_placement, random_seed, maximum_line_
     with open("data_dir/testing_corpus_digraph_dict.json", 'r', encoding='utf-8') as json_file:
         testing_corpus_digraph_dict = json.load(json_file)
 
-    #print(searching_corpus_dict, searching_corpus_digraph_dict, testing_corpus_dict, testing_corpus_digraph_dict)
-    #return searching_corpus, testing_corpus, searching_corpus_dict, searching_corpus_digraph_dict, testing_corpus_dict, testing_corpus_digraph_dict
+    # print(searching_corpus_dict, searching_corpus_digraph_dict, testing_corpus_dict, testing_corpus_digraph_dict)
+    # return searching_corpus, testing_corpus, searching_corpus_dict, searching_corpus_digraph_dict, testing_corpus_dict, testing_corpus_digraph_dict
     return searching_corpus_dict, searching_corpus_digraph_dict, testing_corpus_dict, testing_corpus_digraph_dict
 
 
-def generate_name_from_config(config, date=True, generations=True):
-    name = [config['effort_parameters']['finger_distance_weight']['weight'].__str__()]
-    for value in list(config['effort_parameters'].values())[1:]:
-        name.append(value.__str__())
+def generate_name_from_config(config, date=True, generations=True, hands=False):
+    name = [f"{config['effort_parameters']['finger_distance_weight']['weight']:.2f}"]
+    for value in list(config['effort_parameters'].values())[1:-1]:
+        name.append(f"{value:.2f}")
 
     name = " - ".join(name)
     if generations:
-        name = config['number_of_generations'].__str__() + "-- " + name
+        name = f"{config['number_of_generations']:.2f}" + "-- " + name
 
     if date:
         from datetime import datetime
@@ -185,20 +184,24 @@ def generate_name_from_config(config, date=True, generations=True):
         date_string = current_date_time.strftime("%Y-%m-%d %H-%M-%S")
         name = name + " #  " + date_string
 
+    if hands:
+        name += f" - {config['effort_parameters']['hand_weights']['left']:.2f} - {config['effort_parameters']['hand_weights']['right']:.2f}"
+
     return name
 
 
 def get_non_fixed_punctuation(characters_placement):
     punctuations = '''".',?!:;()[]{}-/&*$%#@+=<>`_^~'''
-    #georgian_letters = 'აბგდევზთიკლმნოპჟრსტუფქღყშჩცძწჭხჯჰ'
+    # georgian_letters = 'აბგდევზთიკლმნოპჟრსტუფქღყშჩცძწჭხჯჰ'
     non_fixed_punctuation = []
     for character in characters_placement:
         if character.character in punctuations and character.button_id is None:
             non_fixed_punctuation.append(character)
     return non_fixed_punctuation
 
+
 def get_non_fixed_letters(characters_placement):
-    #punctuations = '''".',?!:;()[]{}-/&*$%#@+=<>`_^~'''
+    # punctuations = '''".',?!:;()[]{}-/&*$%#@+=<>`_^~'''
     georgian_letters = 'აბგდევზთიკლმნოპჟრსტუფქღყშჩცძწჭხჯჰ'
     non_fixed_letters = []
     for character in characters_placement:

@@ -15,7 +15,7 @@ from helpers import *
 class Effort:
     def __init__(self, finger_distance_weight, load_distribution_weight, modifier_overhead_weight,
                  hand_alternation_weight, consecutive_finger_usage_weight, same_hand_finger_steps_weight,
-                 hit_direction_weight):
+                 hit_direction_weight, hand_weights):
         self.finger_distance_weight = finger_distance_weight['weight']  # finger distance metric weight
         self.finger_weights = finger_distance_weight['finger_weights']
         self.load_distribution_weight = load_distribution_weight  # Ideal load distribution weight for each key
@@ -25,6 +25,7 @@ class Effort:
         self.consecutive_finger_usage_weight = consecutive_finger_usage_weight
         self.same_hand_finger_steps_weight = same_hand_finger_steps_weight
         self.hit_direction_weight = hit_direction_weight
+        self.hand_weights = hand_weights
 
         self.ideal_load_distribution_matrix = [
             [15.21 * x * 0.0001 * 0.5 for x in
@@ -108,10 +109,13 @@ class Effort:
             r, c, _ = self.find_index(character_to_index[character])
             if r == 0:
                 c -= 1
+
+            hand = self.find_hand(c)
+
             c, _ = self.find_hand_finger(c)
 
             v0 += (smallest_distance[character] * (searching_corpus_dict[character] / total_symbols)) * \
-                  self.finger_weights[self.finger_to_finger[c]]
+                  self.finger_weights[self.finger_to_finger[c]] * self.hand_weights[hand]
 
         return v0 * self.empirical_normalisation[0]
 
@@ -315,3 +319,8 @@ class Effort:
             effort['hit_direction_weight'] = 0.
 
         return effort
+
+    def find_hand(self, c):
+        if c < 5:
+            return "left"
+        return "right"
