@@ -74,25 +74,18 @@ class SocketController:
 
 class Optimizer:
     def __init__(self):
-        self.train_neural_network = TrainNeuralNetwork()
+        pass
 
     def search(self, optimization_config, socket_progress_emit, initialization_finish_emit, result_emit):
-
         config = copy.deepcopy(config_initial)
+
         config['effort_parameters'] = optimization_config['effort_parameters']
         config['punctuation_placement'] = optimization_config['punctuation_placement']
         config['number_of_generations'] = optimization_config['number_of_generations']
 
-        model_name = generate_name_from_config(config, date=False, generations=False, hands=True)
-        model_name = "saved_models/" + model_name + " # 10000 - 2000.keras"
+        self.validate_config(config)
 
-        if os.path.exists(model_name):
-            # Model file exists, load the model
-            info_log("Loading the neural network model")
-            model = keras.models.load_model(model_name)
-        else:
-            info_log("Couldn't find the neural network model specified, training a neural network from scratch")
-            model = self.train_neural_network.train(config)
+        model = NeuralNetworkModel(config, date=False, generations=False, hands=True).get()
 
         picture_name = generate_name_from_config(config)
 
@@ -141,3 +134,34 @@ class Optimizer:
         genetic.start()
 
         result_emit(genetic)
+
+    def validate_config(self, config):
+        if not config['punctuation_placement']:
+            config['punctuation_placement'] = [58, 59, 34, 35, 81, 82, 43, 44, 45, 90, 91, 92]
+
+
+class NeuralNetworkModel:
+    def __init__(self, config, date, generations, hands):
+        self.train_neural_network = TrainNeuralNetwork()
+        model_name = generate_name_from_config(config, date=False, generations=False, hands=True)
+        model_name = "saved_models/" + model_name + " # 10000 - 2000 - "
+
+        with open("punctuation_placements.json", 'r') as json_file:
+            punctuation_placements = json.load(json_file)
+
+        punctuation_placement = sorted(config['punctuation_placement'])
+        for key, value in punctuation_placements.items():
+            sorted_value = sorted(value)
+            if punctuation_placement == sorted_value:
+                model_name = model_name + key + ".keras"
+                break
+
+        if os.path.exists(model_name):
+            info_log("Loading the neural network model")
+            self.model = keras.models.load_model(model_name)
+        else:
+            info_log("Couldn't find the neural network model specified, training a neural network from scratch")
+            self.model = self.train_neural_network.train(config)
+
+    def get(self):
+        return self.model
