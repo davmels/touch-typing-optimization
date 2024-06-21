@@ -1,4 +1,4 @@
-from helpers import *
+from utility.helpers import *
 from classes.location import Location
 from classes.size import Size
 

@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 from multiprocessing import Process, Manager
 from threading import Thread
-from helpers import *
+from utility.helpers import *
 
 
 class Genetic:

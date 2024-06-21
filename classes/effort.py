@@ -1,16 +1,5 @@
-from helpers import *
+from utility.helpers import *
 
-'''
-იყვნენ ერთად, ლოგიკურები ერთად.
-ფრჩხილები ერთად.
-რამდენიმე სიმბოლოს მიეცი ისა, რო იყოს უშიფტოდ მთავარ რიგებში.
-ლოგიკური ჯგუფები.
-'''
-
-
-# 2.3 minutes and 2.75 minutes with all effort things...
-# 0.52 0.54
-# 8.24 minutes,
 
 class Effort:
     def __init__(self, finger_distance_weight, load_distribution_weight, modifier_overhead_weight,

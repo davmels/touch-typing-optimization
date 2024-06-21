@@ -1,9 +1,12 @@
 from flask import Flask
 from flask_socketio import SocketIO
 from flask_cors import CORS
-from controller import SocketController, AppController
+
 import os
 from dotenv import load_dotenv
+
+from Controllers.AppController import AppController
+from Controllers.SocketController import SocketController
 
 load_dotenv()
 vite_server_url = os.getenv('VITE_SERVER_URL')

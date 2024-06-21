@@ -5,7 +5,7 @@ import cv2
 import cv2 as cv
 import numpy as np
 
-from helpers import *
+from utility.helpers import *
 from classes.button import Button
 from classes.hand import Hand
 
