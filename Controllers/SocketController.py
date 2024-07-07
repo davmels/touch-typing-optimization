@@ -62,7 +62,7 @@ class SocketController:
             sid = request.sid
 
             def result_emit(analysis):
-                self.socketio.emit('analysis_result', {"analysis": analysis}, to=sid)
+                self.socketio.emit('analysis_result', analysis, to=sid)
 
             thread = threading.Thread(target=self.analyser.analyse,
                                       args=(optimization_config, result_emit))

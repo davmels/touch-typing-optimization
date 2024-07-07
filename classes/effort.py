@@ -1,4 +1,6 @@
+from classes.character import Character
 from utility.helpers import *
+from copy import deepcopy
 
 
 class Effort:
@@ -130,9 +132,13 @@ class Effort:
 
         for index, character in enumerate(characters_set):
             if character.character in searching_corpus_dict:
-                v2 += searching_corpus_dict[character.character]
+                r, c, _ = self.find_index(index)
+                if r == 0:
+                    c -= 1
+                hand = self.find_hand(c)
+                v2 += searching_corpus_dict[character.character] * self.hand_weights[hand]
                 if index > 46:
-                    v2 += searching_corpus_dict[character.character]
+                    v2 += searching_corpus_dict[character.character] * self.hand_weights[hand]
 
         return v2 / total_symbols * self.empirical_normalisation[2]
 
@@ -177,11 +183,12 @@ class Effort:
                 c1 -= 1
             if r2 == 0:
                 c2 -= 1
+            hand = self.find_hand(c1)
             cc1, h1 = self.find_hand_finger(c1)
             cc2, h2 = self.find_hand_finger(c2)
 
             if cc1 == cc2 and h1 == h2:
-                v4 += searching_corpus_digraph_dict[digraph] * distance(r1, cc1, r2, cc2)
+                v4 += searching_corpus_digraph_dict[digraph] * distance(r1, cc1, r2, cc2) * self.hand_weights[hand]
 
         return v4 / total_digraphs * self.empirical_normalisation[4]
 
@@ -199,11 +206,12 @@ class Effort:
                 c1 -= 1
             if r2 == 0:
                 c2 -= 1
+            hand = self.find_hand(c1)
             cc1, h1 = self.find_hand_finger(c1)
             cc2, h2 = self.find_hand_finger(c2)
             if h1 == h2:
                 v5 += searching_corpus_digraph_dict[digraph] * self.finger_step_coefficients[cc1][cc2] * math.fabs(
-                    r1 - r2)
+                    r1 - r2) * self.hand_weights[hand]
 
         return v5 / total_digraphs * self.empirical_normalisation[5]
 
@@ -222,8 +230,9 @@ class Effort:
             cc1, h1 = self.find_hand_finger(c1)
             cc2, h2 = self.find_hand_finger(c2)
             if h1 == h2:
+                hand = self.find_hand(c1)
                 if cc1 < cc2:
-                    v6 += searching_corpus_digraph_dict[digraph]
+                    v6 += searching_corpus_digraph_dict[digraph] * self.hand_weights[hand]
 
         return v6 / total_digraphs * self.empirical_normalisation[6]
 
@@ -270,43 +279,121 @@ class Effort:
                                   searching_corpus_digraph_dict):
         effort = {}
         if self.finger_distance_weight != 0:
-            effort['finger_distance_weight'] = self.finger_distance_weight * self.finger_distance(keyboard_structure,
+            effort['finger_distance_effort'] = self.finger_distance_weight * self.finger_distance(keyboard_structure,
                                                                                                   searching_corpus_dict,
                                                                                                   characters_set)
         else:
-            effort['finger_distance_weight'] = 0.
+            effort['finger_distance_effort'] = 0.
         # if self.load_distribution_weight != 0:
         #     effort['load_distribution_weight'] = (
         #             self.load_distribution_weight * self.load_distribution(searching_corpus_dict, characters_set))
         # else:
         #     effort['load_distribution_weight'] = 0.
         if self.modifier_overhead_weight != 0:
-            effort['modifier_overhead_weight'] = self.modifier_overhead_weight * self.modifier_overhead(
+            effort['modifier_overhead_effort'] = self.modifier_overhead_weight * self.modifier_overhead(
                 searching_corpus_dict, characters_set)
         else:
-            effort['modifier_overhead_weight'] = 0.
+            effort['modifier_overhead_effort'] = 0.
         if self.hand_alternation_weight != 0:
-            effort['hand_alternation_weight'] = self.hand_alternation_weight * self.hand_alternation(
+            effort['hand_alternation_effort'] = self.hand_alternation_weight * self.hand_alternation(
                 searching_corpus_digraph_dict,
                 characters_set)
         else:
-            effort['hand_alternation_weight'] = 0.
+            effort['hand_alternation_effort'] = 0.
         if self.consecutive_finger_usage_weight != 0:
-            effort['consecutive_finger_usage_weight'] = self.consecutive_finger_usage(searching_corpus_digraph_dict,
+            effort['consecutive_finger_usage_effort'] = self.consecutive_finger_usage(searching_corpus_digraph_dict,
                                                                                       characters_set) * self.consecutive_finger_usage_weight
         else:
-            effort['consecutive_finger_usage_weight'] = 0.
+            effort['consecutive_finger_usage_effort'] = 0.
         if self.same_hand_finger_steps_weight != 0:
-            effort['same_hand_finger_steps_weight'] = self.same_hand_finger_steps(searching_corpus_digraph_dict,
+            effort['same_hand_finger_steps_effort'] = self.same_hand_finger_steps(searching_corpus_digraph_dict,
                                                                                   characters_set) * self.same_hand_finger_steps_weight
         else:
-            effort['same_hand_finger_steps_weight'] = 0.
+            effort['same_hand_finger_steps_effort'] = 0.
         if self.hit_direction_weight != 0:
-            effort['hit_direction_weight'] = self.hit_direction(searching_corpus_digraph_dict,
+            effort['hit_direction_effort'] = self.hit_direction(searching_corpus_digraph_dict,
                                                                 characters_set) * self.hit_direction_weight
         else:
-            effort['hit_direction_weight'] = 0.
+            effort['hit_direction_effort'] = 0.
 
+        left_old = self.hand_weights['left']
+        right_old = self.hand_weights['right']
+        self.hand_weights['left'] = 1
+        self.hand_weights['right'] = 0
+        effort['left_hand_effort'] = self.calculate_effort(keyboard_structure, searching_corpus_dict, characters_set,
+                                                           searching_corpus_digraph_dict)
+        self.hand_weights['left'] = 0
+        self.hand_weights['right'] = 1
+        effort['right_hand_effort'] = self.calculate_effort(keyboard_structure, searching_corpus_dict, characters_set,
+                                                            searching_corpus_digraph_dict)
+        self.hand_weights = {"left": left_old, "right": right_old}
+        effort['total_effort'] = self.calculate_effort(keyboard_structure, searching_corpus_dict, characters_set,
+                                                       searching_corpus_digraph_dict)
+
+        with open("data_dir/predefined_layouts/genetic_config_qwerty.json", 'r', encoding='utf-8') as json_file:
+            qwerty_config = json.load(json_file)
+            qwerty_effort = qwerty_config['effort_parameters']
+
+            effort1 = Effort(finger_distance_weight=qwerty_effort['finger_distance_weight'],
+                             load_distribution_weight=qwerty_effort['load_distribution_weight'],
+                             modifier_overhead_weight=qwerty_effort['modifier_overhead_weight'],
+                             hand_alternation_weight=qwerty_effort['hand_alternation_weight'],
+                             consecutive_finger_usage_weight=qwerty_effort['consecutive_finger_usage_weight'],
+                             same_hand_finger_steps_weight=qwerty_effort['same_hand_finger_steps_weight'],
+                             hit_direction_weight=qwerty_effort['hit_direction_weight'],
+                             hand_weights=self.hand_weights)
+            print("right here mate")
+            print(self.finger_distance_weight,
+                  self.load_distribution_weight,
+                  self.modifier_overhead_weight,
+                  self.hand_alternation_weight,
+                  self.consecutive_finger_usage_weight,
+                  self.same_hand_finger_steps_weight,
+                  self.hit_direction_weight,
+                  self.hand_weights)
+            print(effort1.finger_distance_weight,
+                  effort1.load_distribution_weight,
+                  effort1.modifier_overhead_weight,
+                  effort1.hand_alternation_weight,
+                  effort1.consecutive_finger_usage_weight,
+                  effort1.same_hand_finger_steps_weight,
+                  effort1.hit_direction_weight,
+                  effort1.hand_weights)
+            print([x.character for x in characters_set])
+            characters_set2 = list()
+            for character in qwerty_config['characters_set']:
+                characters_set2.append(Character(
+                    character=character['character'],
+                    button_id=character['button_id'],
+                ))
+            print([x.character for x in characters_set2])
+
+            effort['qwerty_effort'] = effort1.calculate_effort(keyboard_structure, searching_corpus_dict,
+                                                               characters_set2, searching_corpus_digraph_dict)
+
+        with open("data_dir/predefined_layouts/genetic_config_dvorjak.json", 'r', encoding='utf-8') as json_file:
+            dvorjak_config = json.load(json_file)
+            dvorjak_effort = dvorjak_config['effort_parameters']
+            effort2 = Effort(finger_distance_weight=dvorjak_effort['finger_distance_weight'],
+                             load_distribution_weight=dvorjak_effort['load_distribution_weight'],
+                             modifier_overhead_weight=dvorjak_effort['modifier_overhead_weight'],
+                             hand_alternation_weight=dvorjak_effort['hand_alternation_weight'],
+                             consecutive_finger_usage_weight=dvorjak_effort['consecutive_finger_usage_weight'],
+                             same_hand_finger_steps_weight=dvorjak_effort['same_hand_finger_steps_weight'],
+                             hit_direction_weight=dvorjak_effort['hit_direction_weight'],
+                             hand_weights=self.hand_weights)
+
+            characters_set2 = list()
+            for character in dvorjak_config['characters_set']:
+                characters_set2.append(Character(
+                    character=character['character'],
+                    button_id=character['button_id'],
+                ))
+
+            effort['dvorjak_effort'] = effort2.calculate_effort(keyboard_structure, searching_corpus_dict,
+                                                                characters_set2,
+                                                                searching_corpus_digraph_dict)
+        print(effort)
         return effort
 
     def find_hand(self, c):

@@ -47,15 +47,11 @@ class TrainNeuralNetwork:
         data = np.zeros([self.number_of_keyboards, self.number_of_characters, self.number_of_characters], dtype=int)
         labels = np.zeros([self.number_of_keyboards], dtype=float)
 
-        searching_corpus_dict, searching_corpus_digraph_dict, testing_corpus_dict, testing_corpus_digraph_dict = process_corpus(
-            corpus_path=genetic_config['corpus_path'], characters_placement=initial_characters_placement,
-            random_seed=genetic_config['random_seed'],
-            maximum_line_length=genetic_config['maximum_line_length'],
-            searching_corpus_size=genetic_config['searching_corpus_size'],
-            testing_corpus_size=genetic_config['testing_corpus_size'])
+        searching_corpus_dict, searching_corpus_digraph_dict, testing_corpus_dict, testing_corpus_digraph_dict = process_corpus()
 
         info_log(f"preparing dataset for training consisting of {self.number_of_keyboards} keyboards")
         for keyboard in tqdm(range(self.number_of_keyboards)):
+            #print(keyboard, [character.character for character in self.characters_placements[keyboard].characters_set])
             for index, character in enumerate(self.characters_placements[keyboard].characters_set):
                 data[keyboard][index][character_to_predefined_key[character.character]] = 1
             labels[keyboard] = effort.calculate_effort(keyboard_structure, searching_corpus_dict,

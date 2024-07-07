@@ -38,10 +38,11 @@ class Analyser:
 
         searching_corpus_dict, searching_corpus_digraph_dict, testing_corpus_dict, testing_corpus_digraph_dict = process_corpus()
 
-        characters_placement.calculate_fitness(keyboard_structure, testing_corpus_dict, testing_corpus_digraph_dict)
-        info_log('Fitness value: %s' % characters_placement.fitness)
+        detailed_effort = characters_placement.effort.calculate_effort_detailed(keyboard_structure, testing_corpus_dict, characters_placement.characters_set, testing_corpus_digraph_dict)
 
-        res_func(characters_placement.fitness)
+        info_log('Fitness value: %s' % detailed_effort['total_effort'])
+
+        res_func(detailed_effort)
 
     def validate_config(self, config):
         if not config['punctuation_placement']:

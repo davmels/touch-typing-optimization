@@ -76,3 +76,4 @@ class Optimizer:
     def validate_config(self, config):
         if not config['punctuation_placement']:
             config['punctuation_placement'] = [58, 59, 34, 35, 81, 82, 43, 44, 45, 90, 91, 92]
+        
