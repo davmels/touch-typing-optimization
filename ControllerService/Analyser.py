@@ -1,11 +1,13 @@
 import copy
-import json
 from classes.characters_placement import CharactersPlacement
 from classes.keyboard_structure import KeyboardStructure
 from utility.helpers import *
 
 with open('data_dir/config.json', 'r', encoding='utf-8') as jfr:
     config_initial = json.load(jfr)
+
+with open('data_dir/predefined_layouts/genetic_config_qwerty.json', 'r', encoding='utf-8') as jfr:
+    config_qwerty = json.load(jfr)
 
 
 class Analyser:
@@ -34,15 +36,26 @@ class Analyser:
         info_log('Construct initial characters placement')
         characters_placement = CharactersPlacement(characters_set=config['characters_set'],
                                                    punctuation_placement=config['punctuation_placement'],
-                                                   effort_parameters=config['effort_parameters'])
+                                                   effort_parameters=copy.deepcopy(config['effort_parameters']))
+
+        characters_placement_qwerty = CharactersPlacement(characters_set=config_qwerty['characters_set'],
+                                                          punctuation_placement=config_qwerty['punctuation_placement'],
+                                                          effort_parameters=copy.deepcopy(config['effort_parameters']))
 
         searching_corpus_dict, searching_corpus_digraph_dict, testing_corpus_dict, testing_corpus_digraph_dict = process_corpus()
 
-        detailed_effort = characters_placement.effort.calculate_effort_detailed(keyboard_structure, testing_corpus_dict, characters_placement.characters_set, testing_corpus_digraph_dict)
+        detailed_effort = characters_placement.effort.calculate_effort_detailed(keyboard_structure, testing_corpus_dict,
+                                                                                characters_placement.characters_set,
+                                                                                testing_corpus_digraph_dict)
+
+        detailed_effort_qwerty = characters_placement_qwerty.effort.calculate_effort_detailed(keyboard_structure,
+                                                                                              testing_corpus_dict,
+                                                                                              characters_placement_qwerty.characters_set,
+                                                                                              testing_corpus_digraph_dict)
 
         info_log('Fitness value: %s' % detailed_effort['total_effort'])
 
-        res_func(detailed_effort)
+        res_func({"your_layout": detailed_effort, "qwerty": detailed_effort_qwerty})
 
     def validate_config(self, config):
         if not config['punctuation_placement']:
