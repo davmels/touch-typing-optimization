@@ -1,13 +1,7 @@
-import re
-import os
 import copy
-import time
-import math
-import numpy as np
 from tqdm import tqdm
 
 from multiprocessing import Process, Manager
-from threading import Thread
 from utility.helpers import *
 
 
@@ -45,17 +39,11 @@ class Genetic:
         self.character_to_predefined_key = character_to_predefined_key
         self.socket_emit_progress = socket_emit_progress
 
-        # searching_corpus, testing_corpus, searching_corpus_dict, searching_corpus_digraph_dict, testing_corpus_dict, testing_corpus_digraph_dict = process_corpus(
-        #     corpus_path=corpus_path, characters_placement=self.initial_characters_placement, random_seed=random_seed,
-        #     maximum_line_length=maximum_line_length, searching_corpus_size=searching_corpus_size,
-        #     testing_corpus_size=testing_corpus_size)
         searching_corpus_dict, searching_corpus_digraph_dict, testing_corpus_dict, testing_corpus_digraph_dict = process_corpus(
             corpus_path=corpus_path, characters_placement=self.initial_characters_placement, random_seed=random_seed,
             maximum_line_length=maximum_line_length, searching_corpus_size=searching_corpus_size,
             testing_corpus_size=testing_corpus_size)
 
-        # self.searching_corpus = searching_corpus
-        # self.testing_corpus = testing_corpus
         self.searching_corpus_dict = searching_corpus_dict
         self.searching_corpus_digraph_dict = searching_corpus_digraph_dict
         self.testing_corpus_dict = testing_corpus_dict
@@ -79,9 +67,7 @@ class Genetic:
             if self.model != None:
                 info_log('Calculate fitness function for each characters placement')
                 best_characters_placements = self.calculate_fitness_for_characters_placements_DNN()
-                # if self.best_characters_placement is None or best_characters_placement.fitness < self.best_characters_placement.fitness:
-                #     self.best_characters_placement = best_characters_placement
-                # info_log('Best characters placement fitness value: %s' % self.best_characters_placement.fitness)
+
                 info_log('Best characters placement fitness value: %s' % best_characters_placements[0][2])
 
                 true_fitness = []
@@ -259,13 +245,6 @@ class Genetic:
     def mutate_characters_placements(self):
         for characters_placement in self.characters_placements[self.number_of_accepted_characters_placements:]:
             characters_placement.mutate(self.maximum_number_of_mutation_operations)
-
-    # def save_searching_and_testing_corpus(self, dirpath):
-    #     with open(os.path.join(dirpath, 'searching_corpus'), 'w', encoding='utf-8') as file:
-    #         file.write('\n'.join(self.searching_corpus))
-    #
-    #     with open(os.path.join(dirpath, 'testing_corpus'), 'w', encoding='utf-8') as file:
-    #         file.write('\n'.join(self.testing_corpus))
 
     def _crossover_old(self, a, b):
         new_characters_placement = copy.deepcopy(a)

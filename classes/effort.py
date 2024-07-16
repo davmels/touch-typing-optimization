@@ -1,6 +1,4 @@
-from classes.character import Character
 from utility.helpers import *
-from copy import deepcopy
 
 
 class Effort:
@@ -161,8 +159,6 @@ class Effort:
                 index_b -= 1
 
             if index_a < 5 and index_b < 5 or index_a > 4 and index_b > 4:
-                # if (digraph[0] in self.georgian_letters and digraph[1] in self.georgian_letters) or \
-                #         (digraph[0] in self.punctuation and digraph[1] in self.punctuation):
                 v3 += searching_corpus_digraph_dict[digraph]
 
         return v3 * self.empirical_normalisation[3] / total_digraphs
@@ -284,11 +280,7 @@ class Effort:
                                                                                                   characters_set)
         else:
             effort['finger_distance_effort'] = 0.
-        # if self.load_distribution_weight != 0:
-        #     effort['load_distribution_weight'] = (
-        #             self.load_distribution_weight * self.load_distribution(searching_corpus_dict, characters_set))
-        # else:
-        #     effort['load_distribution_weight'] = 0.
+
         if self.modifier_overhead_weight != 0:
             effort['modifier_overhead_effort'] = self.modifier_overhead_weight * self.modifier_overhead(
                 searching_corpus_dict, characters_set)
@@ -327,76 +319,12 @@ class Effort:
         self.hand_weights['right'] = 1
         effort['right_hand_effort'] = self.calculate_effort(keyboard_structure, searching_corpus_dict, characters_set,
                                                             searching_corpus_digraph_dict)
-        print(left_old, right_old)
+
         self.hand_weights = {"left": left_old, "right": right_old}
 
         effort['total_effort'] = self.calculate_effort(keyboard_structure, searching_corpus_dict, characters_set,
                                                        searching_corpus_digraph_dict)
 
-        # with open("data_dir/predefined_layouts/genetic_config_qwerty.json", 'r', encoding='utf-8') as json_file:
-        #     qwerty_config = json.load(json_file)
-        #     qwerty_effort = qwerty_config['effort_parameters']
-        #
-        #     effort1 = Effort(finger_distance_weight=qwerty_effort['finger_distance_weight'],
-        #                      load_distribution_weight=qwerty_effort['load_distribution_weight'],
-        #                      modifier_overhead_weight=qwerty_effort['modifier_overhead_weight'],
-        #                      hand_alternation_weight=qwerty_effort['hand_alternation_weight'],
-        #                      consecutive_finger_usage_weight=qwerty_effort['consecutive_finger_usage_weight'],
-        #                      same_hand_finger_steps_weight=qwerty_effort['same_hand_finger_steps_weight'],
-        #                      hit_direction_weight=qwerty_effort['hit_direction_weight'],
-        #                      hand_weights=self.hand_weights)
-        #     print("right here mate")
-        #     print(self.finger_distance_weight,
-        #           self.load_distribution_weight,
-        #           self.modifier_overhead_weight,
-        #           self.hand_alternation_weight,
-        #           self.consecutive_finger_usage_weight,
-        #           self.same_hand_finger_steps_weight,
-        #           self.hit_direction_weight,
-        #           self.hand_weights)
-        #     print(effort1.finger_distance_weight,
-        #           effort1.load_distribution_weight,
-        #           effort1.modifier_overhead_weight,
-        #           effort1.hand_alternation_weight,
-        #           effort1.consecutive_finger_usage_weight,
-        #           effort1.same_hand_finger_steps_weight,
-        #           effort1.hit_direction_weight,
-        #           effort1.hand_weights)
-        #     print([x.character for x in characters_set])
-        #     characters_set2 = list()
-        #     for character in qwerty_config['characters_set']:
-        #         characters_set2.append(Character(
-        #             character=character['character'],
-        #             button_id=character['button_id'],
-        #         ))
-        #     print([x.character for x in characters_set2])
-        #
-        #     effort['qwerty_effort'] = effort1.calculate_effort(keyboard_structure, searching_corpus_dict,
-        #                                                        characters_set2, searching_corpus_digraph_dict)
-        #
-        # with open("data_dir/predefined_layouts/genetic_config_dvorjak.json", 'r', encoding='utf-8') as json_file:
-        #     dvorjak_config = json.load(json_file)
-        #     dvorjak_effort = dvorjak_config['effort_parameters']
-        #     effort2 = Effort(finger_distance_weight=dvorjak_effort['finger_distance_weight'],
-        #                      load_distribution_weight=dvorjak_effort['load_distribution_weight'],
-        #                      modifier_overhead_weight=dvorjak_effort['modifier_overhead_weight'],
-        #                      hand_alternation_weight=dvorjak_effort['hand_alternation_weight'],
-        #                      consecutive_finger_usage_weight=dvorjak_effort['consecutive_finger_usage_weight'],
-        #                      same_hand_finger_steps_weight=dvorjak_effort['same_hand_finger_steps_weight'],
-        #                      hit_direction_weight=dvorjak_effort['hit_direction_weight'],
-        #                      hand_weights=self.hand_weights)
-        #
-        #     characters_set2 = list()
-        #     for character in dvorjak_config['characters_set']:
-        #         characters_set2.append(Character(
-        #             character=character['character'],
-        #             button_id=character['button_id'],
-        #         ))
-        #
-        #     effort['dvorjak_effort'] = effort2.calculate_effort(keyboard_structure, searching_corpus_dict,
-        #                                                         characters_set2,
-        #                                                         searching_corpus_digraph_dict)
-        print(effort)
         return effort
 
     def find_hand(self, c):

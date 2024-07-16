@@ -1,6 +1,6 @@
-from utility.helpers import *
 from classes.location import Location
 from classes.size import Size
+
 
 class Button:
     def __init__(self, id, location, size):

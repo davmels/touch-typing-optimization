@@ -1,15 +1,12 @@
 import json
-import re
 import sys
 import time
 import math
 import random
 
-import numpy as np
-
 PX = 37.7952755906
 
-
+import numpy as np
 # 1 centimeter = 37.7952755906 pixels
 
 def cm2px(cm):
@@ -122,7 +119,6 @@ def generate_name_from_config(config, date=True, generations=True, hands=False):
 
 def get_non_fixed_punctuation(characters_placement):
     punctuations = '''".',?!:;()[]{}-/&*$%#@+=<>`_^~'''
-    # georgian_letters = 'აბგდევზთიკლმნოპჟრსტუფქღყშჩცძწჭხჯჰ'
     non_fixed_punctuation = []
     for character in characters_placement:
         if character.character in punctuations and character.button_id is None:
@@ -131,7 +127,6 @@ def get_non_fixed_punctuation(characters_placement):
 
 
 def get_non_fixed_letters(characters_placement):
-    # punctuations = '''".',?!:;()[]{}-/&*$%#@+=<>`_^~'''
     georgian_letters = 'აბგდევზთიკლმნოპჟრსტუფქღყშჩცძწჭხჯჰ'
     non_fixed_letters = []
     for character in characters_placement:

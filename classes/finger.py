@@ -1,6 +1,5 @@
-import copy
-
 from classes.location import Location
+
 
 class Finger:
     def __init__(self, location):

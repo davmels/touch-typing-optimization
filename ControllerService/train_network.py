@@ -51,7 +51,6 @@ class TrainNeuralNetwork:
 
         info_log(f"preparing dataset for training consisting of {self.number_of_keyboards} keyboards")
         for keyboard in tqdm(range(self.number_of_keyboards)):
-            #print(keyboard, [character.character for character in self.characters_placements[keyboard].characters_set])
             for index, character in enumerate(self.characters_placements[keyboard].characters_set):
                 data[keyboard][index][character_to_predefined_key[character.character]] = 1
             labels[keyboard] = effort.calculate_effort(keyboard_structure, searching_corpus_dict,

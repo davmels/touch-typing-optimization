@@ -1,9 +1,7 @@
 import os
-import copy
 
 import cv2
 import cv2 as cv
-import numpy as np
 
 from utility.helpers import *
 from classes.button import Button
@@ -69,13 +67,6 @@ class KeyboardStructure:
                 color=(80, 62, 44),
                 thickness=-1
             )
-            # cv.circle(
-            #     img=img,
-            #     center=cm2px((button.center.x, button.center.y)),
-            #     radius=cm2px(0.15),
-            #     color=random_color(),
-            #     thickness=-1
-            # )
 
         if show_hands:
             for hand in self.hands:
@@ -145,7 +136,7 @@ class KeyboardStructure:
             for row_idx in range(table_row_count):
                 y = int(cm2px(0.4) + row_idx * (table_font_scale * 30 + table_spacing))  # Convert to integer
                 for col_idx in range(table_col_count):
-                    x = int(cm2px(0.5) + col_idx * cm2px(self.width/2))  # Convert to integer
+                    x = int(cm2px(0.5) + col_idx * cm2px(self.width / 2))  # Convert to integer
                     text_idx = row_idx * table_col_count + col_idx
                     if text_idx < len(table_text):
                         text = table_text[text_idx]
@@ -165,7 +156,6 @@ class KeyboardStructure:
         cv.waitKey(0)
 
         if save:
-            print(self.name)
             cv.imwrite(os.path.join(dirpath, self.name + '.png'), img)
 
     def _check_buttons_overlapping(self):

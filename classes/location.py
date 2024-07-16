@@ -1,5 +1,5 @@
 import math
-import numpy as np
+
 
 class Location:
     def __init__(self, x, y):
