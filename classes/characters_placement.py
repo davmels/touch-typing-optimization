@@ -9,8 +9,7 @@ class CharactersPlacement:
         self.fitness = -1
         self.punctuation_placement = sorted([x - 1 for x in [y for y in punctuation_placement if
                                                              characters_set[y - 1]['button_id'] is None]])
-        print("filtered: ", self.punctuation_placement)
-        print("original: ", punctuation_placement)
+
         self.characters_set = list()
         for character in characters_set:
             self.characters_set.append(Character(
@@ -26,12 +25,9 @@ class CharactersPlacement:
         self.character_indices = None
         self.non_fixed_punctuation = get_non_fixed_punctuation(self.characters_set)
         if len(punctuation_placement) > 18:
-            print("number of dummy characters: ", len(punctuation_placement) - 18)
             for i in range(len(punctuation_placement) - 18):
                 self.non_fixed_punctuation.append(
                     Character(character="dummy_character_" + str(i + 1), button_id=None))
-
-        print("non-fixed punctuation: ", [character.character for character in self.non_fixed_punctuation])
 
         self.letters_placement = []
         for index, character in enumerate(self.characters_set):
